@@ -27,7 +27,7 @@ Uses [an alternative Jenkinsfile-Runner implementation](https://github.com/ndelo
 
 ## How to use the actions
 
-Here is an example workflow how to use the actions:
+Here is an example [GitHub Action workflow](https://help.github.com/articles/about-github-actions/#about-workflows) that shows how to use the actions in parallel:
 
 ```
 workflow "Jenkins single-shot master" {
@@ -48,6 +48,127 @@ For anything else but demonstration purposes, you probably only want to run one 
 
 For this case, just remove the action you do not need from the [```resolves```](https://developer.github.com/actions/creating-workflows/workflow-configuration-options/#workflow-blocks) attribute of the workflow.
 
+## An example Jenkinsfile that was tested with this
+
+```groovy
+#!groovy
+
+node {
+    // pull request or feature branch
+    if  (env.GITHUB_REF != 'refs/heads/master') {
+        checkoutSource()
+        build()
+        unitTest()
+    } // master branch / production
+    else {
+        checkoutSource()
+        build()
+        allTests()
+    }
+}
+
+def checkoutSource() {
+  stage ('checkoutSource') {
+    // as the commit that triggered that Jenkins action is already mapped to /github/workspace, we just copy that to the workspace
+    copyFilesToWorkSpace()
+  }
+}
+
+def copyFilesToWorkSpace() {
+  sh "cp -r /github/workspace/* $WORKSPACE"
+}
+
+def build () {
+    stage ('Build') {
+      mvn 'clean install -DskipTests=true -Dmaven.javadoc.skip=true -Dcheckstyle.skip=true -B -V'
+    }
+}
+
+
+def unitTest() {
+    stage ('Unit tests') {
+      mvn 'test -B -Dmaven.javadoc.skip=true -Dcheckstyle.skip=true'
+      step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
+      if (currentBuild.result == "UNSTABLE") {
+          sh "exit 1"
+      }
+    }
+}
+
+def allTests() {
+    stage ('All tests') {
+      // don't skip anything
+      mvn 'test -B'
+      step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
+      if (currentBuild.result == "UNSTABLE") {
+          // input "Unit tests are failing, proceed?"
+          sh "exit 1"
+      }
+    }
+}
+
+def mvn(args) {
+    sh "mvn ${args} -Dmaven.test.failure.ignore -Dmaven.repo.local=/github/workspace/.m2"
+}
+```
+
+
+
+## Local Trouble-shooting / customize the packaged Jenkins and plugins
+
+#### Jenkinsfile-Runner Prepackaged
+
+```bash
+docker pull jonico/jenkinsfile-runner-prepackaged
+```
+
+or if you like to build the Docker image from scratch
+
+```bash
+
+git clone https://github.com/jonico/jenkinsfile-runner-github-actions.git
+
+cd jenkinsfile-runner-github-actions/jenkinsfile-runner-prepackaged
+
+docker build -t jonico/jenkinsfile-runner-prepackaged .
+```
+
+Then, cd to your git repo that contains your Jenkinsfile and mount it to ```/github/workspace``` while running the docker container
+
+```bash
+cd <your-repo>
+
+docker run --rm -it -v $(pwd):/github/workspace  jonico/jenkinsfile-runner-prepackaged
+```
+
+In case you like to modify the [Docker base image](https://hub.docker.com/r/jonico/jenkinsfile-runner-github-action/) that defines which version of Jenkins and which plugins are included, you find the Dockerfile [here](https://github.com/jonico/jenkinsfile-runner/blob/master/Dockerfile).
+
+#### Jenkinsfile-Runner Lazyloaded
+
+```bash
+docker pull jonico/jenkinsfile-runner-lazyloaded
+```
+
+or if you like to build the Docker image from scratch
+
+```bash
+
+git clone https://github.com/jonico/jenkinsfile-runner-github-actions.git
+
+cd jenkinsfile-runner-github-actions/jenkinsfile-runner-lazyloaded
+
+docker build -t jonico/jenkinsfile-runner-lazyloaded .
+```
+
+Then, cd to your git repo that contains your Jenkinsfile and mount it to ```/github/workspace``` while running the docker container
+
+```bash
+cd <your-repo>
+
+docker run --rm -it -v $(pwd):/github/workspace  jonico/jenkinsfile-runner-lazyloaded
+```
+
+The customization of the [underlying Docker base image](https://hub.docker.com/r/jenkins/jenkinsfile-runner/) can be done [by customizing this repo](https://github.com/ndeloof/jenkinsfile-runner).
 
 ## Current Limitations / TODOs
 
@@ -57,5 +178,6 @@ This is just a POC, in order to productize this, you would probably
 * Find a better way to populate the job workspace with the content of ```/github/workspace``` other than manually copying the files over as part of your ```Jenkinsfile```
 * Find a better way to package maven binaries and additional plugins
 * Find a better way to share maven plugins other than manually mapping the local maven repo to ```/github/workspace/.m2``` in your ```Jenkinsfile```
+* Find a better way to cache the lazy-loaded Jenkins as ```/github/workspace/.jenkinsfile-runner-cache``` as specified [here](https://github.com/jonico/jenkinsfile-runner-github-actions/blob/master/jenkinsfile-runner-lazyloaded/Dockerfile#L19)
 * Add examples of how to work with [injected GitHub Action secrets](https://developer.github.com/actions/creating-workflows/storing-secrets/) and additional [Jenkins secrets](https://github.com/ndeloof/jenkinsfile-runner#sensitive-data)
 * Provide examples how to copy parts of the Jenkins results to an external storage
