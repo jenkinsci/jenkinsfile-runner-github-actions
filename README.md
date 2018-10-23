@@ -112,6 +112,14 @@ def mvn(args) {
 }
 ```
 
+There are some things to point out with this example:
+* the commit who triggered the action is placed by GitHub Actions into ```/github/workspace``` and the ```checkoutSource``` function is just doing a file copy of all files in this directory to the job's workspace (can probably be optimized)
+* maven's local repo is set to ```/github/workspace/.m2``` as the workspace directory is [shared across actions](https://developer.github.com/actions/creating-github-actions/accessing-the-runtime-environment/#filesystem) of the same workflow
+* so far, Jenkins environmental variables are not populated based on the [GitHub Actions context](https://developer.github.com/actions/creating-github-actions/accessing-the-runtime-environment/#environment-variables) - instead, the GitHub Action environmental variable ```GITHUB_REF```
+* there is no need to explicitly set the commit status after the build finishes as GitHub Actions will do this automatically based on the exit code of the wrapped action
+
+
+![image](https://user-images.githubusercontent.com/1872314/47358580-64579780-d6ca-11e8-8f75-484bdc661a10.png)
 
 
 ## Local Trouble-shooting / customize the packaged Jenkins and plugins
