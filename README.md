@@ -37,10 +37,12 @@ workflow "Jenkins single-shot master" {
 
 action "jenkinsfile-runner-prepackaged" {
   uses = "jonico/jenkinsfile-runner-github-actions/jenkinsfile-runner-prepackaged@master"
+  secrets = ["GITHUB_TOKEN"]
 }
 
 action "jenkinsfile-runner-lazyloaded" {
   uses = "docker://jonico/jenkinsfile-runner-lazyloaded"
+  secrets = ["GITHUB_TOKEN"]
 }
 ```
 
@@ -52,6 +54,7 @@ For this case, just remove the action you do not need from the [```resolves```](
 
 ```groovy
 #!groovy
+import groovy.json.JsonOutput
 
 node {
     // pull request or feature branch
@@ -64,7 +67,21 @@ node {
         checkoutSource()
         build()
         allTests()
+        createRelease("${env.GITHUB_ACTION}-${env.GITHUB_SHA}")
     }
+}
+
+def createRelease(name) {
+  stage ('createRelease') {
+        def payload = JsonOutput.toJson(["tag_name": "v-${name}", "name": "GitHub Action triggered release: ${name}", "body": "This release has been created with the help of a Jenkins single-shot master running inside of a GitHub Action. For more details visit https://github.com/jonico/jenkinsfile-runner-github-actions"])
+        def apiUrl = "https://api.github.com/repos/${env.GITHUB_REPOSITORY}/releases"
+        mysh("curl -s --output /dev/null -H \"Authorization: Token ${env.GITHUB_TOKEN}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d '${payload}' ${apiUrl}")
+    }
+}
+
+// prevent output of secrets and a globbing patterns by Jenkins
+def mysh(cmd) {
+    sh('#!/bin/sh -e\n' + cmd)
 }
 
 def checkoutSource() {
@@ -75,7 +92,7 @@ def checkoutSource() {
 }
 
 def copyFilesToWorkSpace() {
-  sh "cp -r /github/workspace/* $WORKSPACE"
+  mysh "cp -r /github/workspace/* $WORKSPACE"
 }
 
 def build () {
@@ -117,6 +134,7 @@ There are some things to point out with this example:
 * maven's local repo is set to ```/github/workspace/.m2``` as the workspace directory is [shared across actions](https://developer.github.com/actions/creating-github-actions/accessing-the-runtime-environment/#filesystem) of the same workflow
 * so far, Jenkins environmental variables are not populated based on the [GitHub Actions context](https://developer.github.com/actions/creating-github-actions/accessing-the-runtime-environment/#environment-variables) - instead, the GitHub Action environmental variable ```GITHUB_REF```
 * there is no need to explicitly set the commit status after the build finishes as GitHub Actions will do this automatically based on the exit code of the wrapped action
+* the ```mysh```function is used to not show shell glob expansion or ```GITHUB_SECRET``` in the Jenkinsfile
 
 
 ![image](https://user-images.githubusercontent.com/1872314/47358580-64579780-d6ca-11e8-8f75-484bdc661a10.png)
@@ -187,5 +205,5 @@ This is just a POC, in order to productize this, you would probably
 * Find a better way to package maven binaries and additional plugins
 * Find a better way to share maven plugins other than manually mapping the local maven repo to ```/github/workspace/.m2``` in your ```Jenkinsfile```
 * Find a better way to cache the lazy-loaded Jenkins as ```/github/workspace/.jenkinsfile-runner-cache``` as specified [here](https://github.com/jonico/jenkinsfile-runner-github-actions/blob/master/jenkinsfile-runner-lazyloaded/Dockerfile#L19)
-* Add examples of how to work with [injected GitHub Action secrets](https://developer.github.com/actions/creating-workflows/storing-secrets/) and additional [Jenkins secrets](https://github.com/ndeloof/jenkinsfile-runner#sensitive-data)
+* Add examples of how to work with [Jenkins secrets](https://github.com/ndeloof/jenkinsfile-runner#sensitive-data)
 * Provide examples how to copy parts of the Jenkins results to an external storage
