@@ -167,6 +167,12 @@ cd <your-repo>
 docker run --rm -it -v $(pwd):/github/workspace  jonico/jenkinsfile-runner-prepackaged
 ```
 
+If you are using environmental variables in your ```Jenkinsfile```, you would have to specify them using the "-e" command line option for docker:
+
+```bash
+docker run --rm -it -v $(pwd):/github/workspace -e GITHUB_REPOSITORY=jonico/reading-time-app -e GITUB_GITHUB_REF=refs/heads/create-releases -e GITHUB_ACTION=jenkinsfile-runner-prepackaged -e GITHUB_SHA=mysha-3 -e GITHUB_TOKEN=<redacted> jonico/jenkinsfile-runner-prepackaged
+```
+
 In case you like to modify the [Docker base image](https://hub.docker.com/r/jonico/jenkinsfile-runner-github-action/) that defines which version of Jenkins and which plugins are included, you find the Dockerfile [here](https://github.com/jonico/jenkinsfile-runner/blob/master/Dockerfile).
 
 #### Jenkinsfile-Runner Lazyloaded
@@ -192,6 +198,12 @@ Then, cd to your git repo that contains your Jenkinsfile and mount it to ```/git
 cd <your-repo>
 
 docker run --rm -it -v $(pwd):/github/workspace  jonico/jenkinsfile-runner-lazyloaded
+```
+
+If you are using environmental variables in your ```Jenkinsfile```, you would have to specify them using the "-e" command line option for docker.
+
+```bash
+docker run --rm -it -v $(pwd):/github/workspace -e GITHUB_REPOSITORY=jonico/reading-time-app -e GITUB_GITHUB_REF=refs/heads/create-releases -e GITHUB_ACTION=jenkinsfile-runner-lazyloaded -e GITHUB_SHA=mysha-3 -e GITHUB_TOKEN=<redacted> jonico/jenkinsfile-runner-lazyloaded
 ```
 
 The customization of the [underlying Docker base image](https://hub.docker.com/r/jenkins/jenkinsfile-runner/) can be done [by customizing this repo](https://github.com/ndeloof/jenkinsfile-runner).
