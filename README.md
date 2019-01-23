@@ -105,10 +105,6 @@ def build () {
 def unitTest() {
     stage ('Unit tests') {
       mvn 'test -B -Dmaven.javadoc.skip=true -Dcheckstyle.skip=true'
-      step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
-      if (currentBuild.result == "UNSTABLE") {
-          sh "exit 1"
-      }
     }
 }
 
@@ -116,16 +112,11 @@ def allTests() {
     stage ('All tests') {
       // don't skip anything
       mvn 'test -B'
-      step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
-      if (currentBuild.result == "UNSTABLE") {
-          // input "Unit tests are failing, proceed?"
-          sh "exit 1"
-      }
     }
 }
 
 def mvn(args) {
-    sh "mvn ${args} -Dmaven.test.failure.ignore -Dmaven.repo.local=/github/workspace/.m2"
+    sh "mvn ${args} -Dmaven.repo.local=/github/workspace/.m2"
 }
 ```
 
