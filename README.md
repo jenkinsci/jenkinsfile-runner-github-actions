@@ -15,26 +15,22 @@ The commit that triggered the GitHub Action is [automatically mapped](https://de
 
 ![image](https://user-images.githubusercontent.com/1872314/47346015-732f5180-d6ac-11e8-9fbd-9c534e7b3f34.png)
 
-## Available GitHub Actions
+## Available GitHub Action
 
-The POC comes with two actions:
+The POC comes with one action:
 
-#### [jenkinsfile-runner-prepackaged](https://github.com/jonico/jenkinsfile-runner-github-actions/tree/master/jenkinsfile-runner-prepackaged) (recommended)
+#### [jenkinsfile-runner-prepackaged](https://github.com/jonico/jenkinsfile-runner-github-actions/tree/master/jenkinsfile-runner-prepackaged)
 
 Uses the [official Jenkinsfile-Runner](https://github.com/jenkinsci/jenkinsfile-runner) and prepackages Jenkins 2.138.2 and Maven 3.5.2 with it. There is also a [Dockerfile](https://hub.docker.com/r/jonico/jenkinsfile-runner-prepackaged/) available you could refer to in [your workflow](https://help.github.com/articles/about-github-actions/#about-workflows) if you do not like to [refer to the source](https://github.com/jonico/jenkinsfile-runner-github-actions/tree/master/jenkinsfile-runner-prepackaged).
 
-#### [jenkinsfile-runner-lazyloaded](https://github.com/jonico/jenkinsfile-runner-github-actions/tree/master/jenkinsfile-runner-lazyloaded)
+## How to use the action
 
-Uses [an alternative Jenkinsfile-Runner implementation](https://github.com/ndeloof/jenkinsfile-runner) that first downloads the latest version of Jenkins LTS and all plugins specified in ```plugins.txt``` in the commit that is triggering the GitHub Action. There is also a [Dockerfile](https://hub.docker.com/r/jonico/jenkinsfile-runner-lazyloaded/) available you could refer to in [your workflow](https://help.github.com/articles/about-github-actions/#about-workflows) if you do not like to [refer to the source](https://github.com/jonico/jenkinsfile-runner-github-actions/tree/master/jenkinsfile-runner-lazyloaded).
-
-## How to use the actions
-
-Here is an example [GitHub Action workflow](https://help.github.com/articles/about-github-actions/#about-workflows) that shows how to use the actions in parallel:
+Here is an example [GitHub Action workflow](https://help.github.com/articles/about-github-actions/#about-workflows) that shows how to use the action:
 
 ```
 workflow "Jenkins single-shot master" {
   on = "push"
-  resolves = ["jenkinsfile-runner-lazyloaded", "jenkinsfile-runner-prepackaged"]
+  resolves = ["jenkinsfile-runner-prepackaged"]
 }
 
 action "jenkinsfile-runner-prepackaged" {
@@ -42,15 +38,7 @@ action "jenkinsfile-runner-prepackaged" {
   secrets = ["GITHUB_TOKEN"]
 }
 
-action "jenkinsfile-runner-lazyloaded" {
-  uses = "docker://jonico/jenkinsfile-runner-lazyloaded"
-  secrets = ["GITHUB_TOKEN"]
-}
 ```
-
-For anything else but demonstration purposes, you probably only want to run one approach (and not both in parallel).
-
-For this case, just remove the action you do not need from the [```resolves```](https://developer.github.com/actions/creating-workflows/workflow-configuration-options/#workflow-blocks) attribute of the workflow.
 
 ## An example Jenkinsfile that was tested with this
 
@@ -168,38 +156,6 @@ docker run --rm -it -v $(pwd):/github/workspace -e GITHUB_REPOSITORY=jonico/read
 
 In case you like to modify the [Docker base image](https://hub.docker.com/r/jonico/jenkinsfile-runner-github-action/) that defines which version of Jenkins and which plugins are included, you find the Dockerfile [here](https://github.com/jonico/jenkinsfile-runner/blob/master/Dockerfile).
 
-#### Jenkinsfile-Runner Lazyloaded
-
-```bash
-docker pull jonico/jenkinsfile-runner-lazyloaded
-```
-
-or if you like to build the Docker image from scratch
-
-```bash
-
-git clone https://github.com/jonico/jenkinsfile-runner-github-actions.git
-
-cd jenkinsfile-runner-github-actions/jenkinsfile-runner-lazyloaded
-
-docker build -t jonico/jenkinsfile-runner-lazyloaded .
-```
-
-Then, cd to your git repo that contains your Jenkinsfile and mount it to ```/github/workspace``` while running the docker container
-
-```bash
-cd <your-repo>
-
-docker run --rm -it -v $(pwd):/github/workspace  jonico/jenkinsfile-runner-lazyloaded
-```
-
-If you are using environmental variables in your ```Jenkinsfile```, you would have to specify them using the "-e" command line option for docker.
-
-```bash
-docker run --rm -it -v $(pwd):/github/workspace -e GITHUB_REPOSITORY=jonico/reading-time-app -e GITUB_GITHUB_REF=refs/heads/create-releases -e GITHUB_ACTION=jenkinsfile-runner-lazyloaded -e GITHUB_SHA=mysha-3 -e GITHUB_TOKEN=<redacted> jonico/jenkinsfile-runner-lazyloaded
-```
-
-The customization of the [underlying Docker base image](https://hub.docker.com/r/jenkins/jenkinsfile-runner/) can be done [by customizing this repo](https://github.com/ndeloof/jenkinsfile-runner).
 
 ## Current Limitations / TODOs
 
