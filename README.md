@@ -11,8 +11,6 @@ Any GitHub project with a ```Jenkinsfile```can use those actions to execute its 
 
 The commit that triggered the GitHub Action is [automatically mapped](https://help.github.com/en/articles/virtual-environments-for-github-actions#filesystems-on-github-hosted-machines) to ```/github/workspace``` in the Jenkins Docker container. Test results are reported back to the corresponding pull requests.
 
-![image](https://user-images.githubusercontent.com/1872314/47347618-ed150a00-d6af-11e8-87f7-e425c6a43867.png)
-
 ![image](https://user-images.githubusercontent.com/1872314/62881120-4fb6bf80-bd2f-11e9-8609-3f906b2c00f3.png)
 
 
