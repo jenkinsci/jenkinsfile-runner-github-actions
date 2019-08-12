@@ -2,42 +2,44 @@
 
 [![GitHubActions](https://img.shields.io/badge/listed%20on-GitHubActions-blue.svg)](https://github-actions.netlify.com/jenkins-single-shot)
 
-This is a POC how to run [Jenkins Single-shot masters](https://schd.ws/hosted_files/devopsworldjenkinsworld2018/8f/DWJW2018%20-%20A%20Cloud%20Native%20Jenkins.pdf) inside a [GitHub Action Workflow](https://blog.github.com/2018-10-17-action-demos/).
+This is a POC how to run [Jenkins Single-shot masters](https://schd.ws/hosted_files/devopsworldjenkinsworld2018/8f/DWJW2018%20-%20A%20Cloud%20Native%20Jenkins.pdf) inside a [GitHub Action Workflow](https://github.blog/2019-08-08-github-actions-now-supports-ci-cd/).
 
-![image](https://user-images.githubusercontent.com/1872314/47345918-3b280e80-d6ac-11e8-9f44-8cc02754f691.png)
+![image](https://user-images.githubusercontent.com/1872314/62877764-0ca51e00-bd28-11e9-9f6e-afb3ee77c4f9.png)
+
 
 Any GitHub project with a ```Jenkinsfile```can use those actions to execute its defined workflow inside a Docker container run by GitHub that spawns up a new Jenkins master, executes the tests and exits.
 
-The commit that triggered the GitHub Action is [automatically mapped](https://developer.github.com/actions/creating-github-actions/accessing-the-runtime-environment/#filesystem) to ```/github/workspace``` in the Jenkins Docker container. Test results are reported back to the corresponding pull requests.
+The commit that triggered the GitHub Action is [automatically mapped](https://help.github.com/en/articles/virtual-environments-for-github-actions#filesystems-on-github-hosted-machines) to ```/github/workspace``` in the Jenkins Docker container. Test results are reported back to the corresponding pull requests.
 
 ![image](https://user-images.githubusercontent.com/1872314/47347618-ed150a00-d6af-11e8-87f7-e425c6a43867.png)
 
+![image](https://user-images.githubusercontent.com/1872314/62881120-4fb6bf80-bd2f-11e9-8609-3f906b2c00f3.png)
 
-![image](https://user-images.githubusercontent.com/1872314/47346015-732f5180-d6ac-11e8-9fbd-9c534e7b3f34.png)
 
 ## Available GitHub Action
 
 The POC comes with one action:
 
-#### [jenkinsfile-runner-prepackaged](https://github.com/jonico/jenkinsfile-runner-github-actions/tree/master/jenkinsfile-runner-prepackaged)
+#### [jenkinsfile-runner-prepackaged](https://github.com/jenkinsci/jenkinsfile-runner-github-actions/tree/master/jenkinsfile-runner-prepackaged)
 
-Uses the [official Jenkinsfile-Runner](https://github.com/jenkinsci/jenkinsfile-runner) and prepackages Jenkins 2.138.2 and Maven 3.5.2 with it. There is also a [Dockerfile](https://hub.docker.com/r/jonico/jenkinsfile-runner-prepackaged/) available you could refer to in [your workflow](https://help.github.com/articles/about-github-actions/#about-workflows) if you do not like to [refer to the source](https://github.com/jonico/jenkinsfile-runner-github-actions/tree/master/jenkinsfile-runner-prepackaged).
+Uses the [official Jenkinsfile-Runner](https://github.com/jenkinsci/jenkinsfile-runner) and prepackages Jenkins 2.138.2 and Maven 3.5.2 with it. There is also a [Dockerfile](https://hub.docker.com/r/jonico/jenkinsfile-runner-prepackaged/) available you could refer to in [your workflow](https://help.github.com/articles/about-github-actions/#about-workflows) if you do not like to [refer to the source](https://github.com/jenkinsci/jenkinsfile-runner-github-actions/tree/master/jenkinsfile-runner-prepackaged).
 
 ## How to use the action
 
-Here is an example [GitHub Action workflow](https://help.github.com/articles/about-github-actions/#about-workflows) that shows how to use the action:
+Here is an example [GitHub Action workflow](https://help.github.com/en/articles/configuring-a-workflow) that shows how to use the action:
 
-```
-workflow "Jenkins single-shot master" {
-  on = "push"
-  resolves = ["jenkinsfile-runner-prepackaged"]
-}
-
-action "jenkinsfile-runner-prepackaged" {
-  uses = "jonico/jenkinsfile-runner-github-actions/jenkinsfile-runner-prepackaged@master"
-  secrets = ["GITHUB_TOKEN"]
-}
-
+```yaml
+on: push
+name: Jenkins single-shot master
+jobs:
+  jenkinsfile-runner-prepackaged:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: jenkinsfile-runner-prepackaged
+      uses: jonico/jenkinsfile-runner-github-actions/jenkinsfile-runner-prepackaged@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## An example Jenkinsfile that was tested with this
@@ -133,11 +135,11 @@ or if you like to build the Docker image from scratch
 
 ```bash
 
-git clone https://github.com/jonico/jenkinsfile-runner-github-actions.git
+git clone https://github.com/jenkinsci/jenkinsfile-runner-github-actions.git
 
 cd jenkinsfile-runner-github-actions/jenkinsfile-runner-prepackaged
 
-docker build -t jonico/jenkinsfile-runner-prepackaged .
+docker build -t jenkinsci/jenkinsfile-runner-prepackaged .
 ```
 
 Then, cd to your git repo that contains your Jenkinsfile and mount it to ```/github/workspace``` while running the docker container
@@ -145,16 +147,16 @@ Then, cd to your git repo that contains your Jenkinsfile and mount it to ```/git
 ```bash
 cd <your-repo>
 
-docker run --rm -it -v $(pwd):/github/workspace  jonico/jenkinsfile-runner-prepackaged
+docker run --rm -it -v $(pwd):/github/workspace  jenkinsci/jenkinsfile-runner-prepackaged
 ```
 
 If you are using environmental variables in your ```Jenkinsfile```, you would have to specify them using the "-e" command line option for docker:
 
 ```bash
-docker run --rm -it -v $(pwd):/github/workspace -e GITHUB_REPOSITORY=jonico/reading-time-app -e GITUB_GITHUB_REF=refs/heads/create-releases -e GITHUB_ACTION=jenkinsfile-runner-prepackaged -e GITHUB_SHA=mysha-3 -e GITHUB_TOKEN=<redacted> jonico/jenkinsfile-runner-prepackaged
+docker run --rm -it -v $(pwd):/github/workspace -e GITHUB_REPOSITORY=jenkinsci/reading-time-app -e GITUB_GITHUB_REF=refs/heads/create-releases -e GITHUB_ACTION=jenkinsfile-runner-prepackaged -e GITHUB_SHA=mysha-3 -e GITHUB_TOKEN=<redacted> jenkinsci/jenkinsfile-runner-prepackaged
 ```
 
-In case you like to modify the [Docker base image](https://hub.docker.com/r/jonico/jenkinsfile-runner-github-action/) that defines which version of Jenkins and which plugins are included, you find the Dockerfile [here](https://github.com/jonico/jenkinsfile-runner/blob/master/Dockerfile).
+In case you like to modify the [Docker base image](https://hub.docker.com/r/jonico/jenkinsfile-runner-github-action/) that defines which version of Jenkins and which plugins are included, you find the Dockerfile [here](https://github.com/jenkinsci/jenkinsfile-runner/blob/master/Dockerfile).
 
 
 ## Current Limitations / TODOs
