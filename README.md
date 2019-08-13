@@ -38,7 +38,7 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: jenkinsfile-runner-prepackaged
-      uses: jonico/jenkinsfile-runner-github-actions/jenkinsfile-runner-prepackaged@master
+      uses: jenkinsci/jenkinsfile-runner-github-actions/jenkinsfile-runner-prepackaged@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
