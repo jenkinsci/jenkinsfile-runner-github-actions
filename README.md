@@ -2,9 +2,11 @@
 
 [![GitHubActions](https://img.shields.io/badge/listed%20on-GitHubActions-blue.svg)](https://github-actions.netlify.com/jenkins-single-shot)
 
-This is a POC how to run [Jenkins Single-shot masters](https://schd.ws/hosted_files/devopsworldjenkinsworld2018/8f/DWJW2018%20-%20A%20Cloud%20Native%20Jenkins.pdf) inside a [GitHub Action Workflow](https://github.blog/2019-08-08-github-actions-now-supports-ci-cd/).
+This is a POC how to run _Jenkinsfiles_ inside [GitHub Actions](https://github.blog/2019-08-08-github-actions-now-supports-ci-cd/) - [GitHub's built-in CI/CD](https://github.com/features/actions) using embedded [Jenkins Single-shot masters](https://schd.ws/hosted_files/devopsworldjenkinsworld2018/8f/DWJW2018%20-%20A%20Cloud%20Native%20Jenkins.pdf).
 
 ![image](https://user-images.githubusercontent.com/1872314/62877764-0ca51e00-bd28-11e9-9f6e-afb3ee77c4f9.png)
+
+![image](https://user-images.githubusercontent.com/1872314/47345918-3b280e80-d6ac-11e8-9f44-8cc02754f691.png)
 
 
 Any GitHub project with a ```Jenkinsfile```can use those actions to execute its defined workflow inside a Docker container run by GitHub that spawns up a new Jenkins master, executes the tests and exits.
