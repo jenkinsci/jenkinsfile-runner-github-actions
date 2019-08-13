@@ -13,6 +13,9 @@ The commit that triggered the GitHub Action is [automatically mapped](https://he
 
 ![image](https://user-images.githubusercontent.com/1872314/62881120-4fb6bf80-bd2f-11e9-8609-3f906b2c00f3.png)
 
+![image](https://user-images.githubusercontent.com/1872314/62953641-2d37ab80-bdee-11e9-8624-1ce4bf413b07.png)
+
+
 
 ## Available GitHub Action
 
