@@ -1,0 +1,2 @@
+git:latest
+pipeline-model-definition:latest

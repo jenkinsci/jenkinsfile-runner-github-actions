@@ -1,0 +1,25 @@
+FROM jenkins/jenkinsfile-runner:adoptopenjdk-11-hotspot
+
+LABEL "com.github.actions.name"="Jenkinsfile Runner Prepackaged"
+LABEL "com.github.actions.description"="Runs Jenkinsfile in a pre-packaged single-shot master"
+LABEL "com.github.actions.icon"="battery"
+LABEL "com.github.actions.color"="blue"
+
+LABEL "repository"="http://github.com/jonico/jenkinsfilerunner-github-actions"
+LABEL "homepage"="http://github.com/actions"
+LABEL "maintainer"="Johannes Nicolai <jonico@github.com>"
+
+ENV JENKINS_VERSION=2.319.3
+
+COPY Jenkinsfile-helloworld /app/setup/Jenkinsfile-helloworld
+COPY base-plugins.txt /app/setup/plugins.txt
+
+# NOTE: The base as of Feb '22, is 7 months old. For this reason, we need to download the latest LTS and upgrade the base bits
+RUN curl -L http://updates.jenkins.io/download/war/${JENKINS_VERSION}/jenkins.war -o /app/jenkins-${JENKINS_VERSION}.war
+RUN apt-get update && apt-get install -y zip git
+
+COPY setup.sh /app/setup/setup.sh
+RUN /app/setup/setup.sh
+
+COPY entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh" ]

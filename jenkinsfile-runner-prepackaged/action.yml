@@ -1,0 +1,26 @@
+name: jenkinsfile-runner-prepackaged
+description: Run jenkinsfile-runner-prepackaged
+author: jenkinsci
+branding:
+  icon: monitor
+  color: purple
+inputs:
+  jenkinsfile:
+    description: Jenkinsfile location to test
+    default: Jenkinsfile
+    required: false
+  pluginstxt:
+    description: plugins.txt location
+    default: plugins.txt
+    required: false
+  command:
+    description: Jenkinsfile-runner command, i.e; run or lint
+    default: run
+    required: false
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - ${{ inputs.jenkinsfile }}
+    - ${{ inputs.pluginstxt }}
+    - ${{ inputs.command }}
