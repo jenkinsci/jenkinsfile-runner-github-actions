@@ -1,4 +1,4 @@
-FROM jenkins/jenkinsfile-runner:adoptopenjdk-11-hotspot
+FROM ghcr.io/jenkinsci/jenkinsfile-runner:master
 
 LABEL "com.github.actions.name"="Jenkinsfile Runner Prepackaged"
 LABEL "com.github.actions.description"="Runs Jenkinsfile in a pre-packaged single-shot master"
