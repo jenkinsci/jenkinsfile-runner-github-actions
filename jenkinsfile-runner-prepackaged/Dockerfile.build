@@ -11,8 +11,9 @@ LABEL "maintainer"="Johannes Nicolai <jonico@github.com>"
 
 RUN apt-get update && apt-get install -y zip git
 
-COPY setup.sh /app/setup/setup.sh
-RUN /app/setup/setup.sh
+# TODO: Restore when adding GitHub specific plugins
+# COPY setup.sh /app/setup/setup.sh
+# RUN /app/setup/setup.sh
 
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh" ]
