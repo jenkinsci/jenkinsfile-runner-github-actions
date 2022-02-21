@@ -1,0 +1,47 @@
+name: publish
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image; jenkinsfile-runner-lazyloaded
+        id: build_lazy
+        uses: redhat-actions/buildah-build@v2
+        with:
+          context: jenkinsfile-runner-lazyloaded
+          dockerfiles: |
+            ./jenkinsfile-runner-lazyloaded/Dockerfile
+          image: jenkinsfile-runner-lazyloaded
+          oci: true
+          tags: latest
+
+      - name: Push to ghcr.io; jenkinsfile-runner-lazyloaded
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build_lazy.outputs.image }}
+          registry: ghcr.io/${{ github.repository }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          tags: ${{ steps.build_lazy.outputs.tags }}
+
+      - name: Build image; jenkinsfile-runner-prepackaged
+        id: build_prepackaged
+        uses: redhat-actions/buildah-build@v2
+        with:
+          context: jenkinsfile-runner-prepackaged
+          dockerfiles: |
+            ./jenkinsfile-runner-prepackaged/Dockerfile.build
+          image: jenkinsfile-runner-prepackaged
+          oci: true
+          tags: latest
+
+      - name: Push to ghcr.io; jenkinsfile-runner-prepackaged
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build_prepackaged.outputs.image }}
+          registry: ghcr.io/${{ github.repository }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          tags: ${{ steps.build_prepackaged.outputs.tags }}

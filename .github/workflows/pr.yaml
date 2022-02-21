@@ -1,0 +1,19 @@
+name: pr
+on: [pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Switch the action to use the Dockerfile.build
+        run: |
+          mv jenkinsfile-runner-prepackaged/Dockerfile jenkinsfile-runner-prepackaged/Dockerfile.runnable
+          mv jenkinsfile-runner-prepackaged/Dockerfile.build jenkinsfile-runner-prepackaged/Dockerfile
+
+      - name: Test; jenkinsfile-runner-prepackaged
+        uses: ./jenkinsfile-runner-prepackaged
+        with:
+          jenkinsfile: "jenkinsfile-runner-prepackaged/test/Jenkinsfile"
+          pluginstxt: "jenkinsfile-runner-prepackaged/test/plugins.txt"
+          command: "lint"
