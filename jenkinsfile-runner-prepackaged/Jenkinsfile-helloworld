@@ -1,5 +1,6 @@
 node {
-    stage('HelloWorld') {
+    
+stage('HelloWorld') {
         echo "HelloWorld, this is DP"
-    }
+}
 }
