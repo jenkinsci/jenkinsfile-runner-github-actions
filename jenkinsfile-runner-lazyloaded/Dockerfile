@@ -1,7 +1,7 @@
 FROM jenkins/jenkinsfile-runner
 
 LABEL "com.github.actions.name"="Jenkinsfile Runner LazyLoaded"
-LABEL "com.github.actions.description"="Runs Jenkinsfile in a single-shot Jenkins master that still has to be downloaded"
+LABEL "com.github.actions.description"="Runs Jenkinsfile in a single-shot Jenkins controller that still has to be downloaded"
 LABEL "com.github.actions.icon"="battery-charging"
 LABEL "com.github.actions.color"="purple"
 
