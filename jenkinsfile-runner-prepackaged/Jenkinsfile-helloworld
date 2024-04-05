@@ -1,5 +1,36 @@
-node {
-    stage('HelloWorld') {
-        echo "HelloWorld"
+pipeline {
+    agent any
+
+    stages {
+        stage('Build') {
+            steps {
+                // TODO: Add build step
+                sh './gradlew assemble'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // TODO: Add test step
+                sh './gradlew test'
+            }
+        }
+    }
+
+    post {
+        always {
+            // Archive the build artifacts
+            archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
+        }
+
+        success {
+            echo 'Build and tests succeeded! Deploying...'
+            // Add deployment steps here
+        }
+
+        failure {
+            echo 'Build or tests failed! Notifications sent...'
+            // Add notification steps here
+        }
     }
 }
