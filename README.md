@@ -1,4 +1,4 @@
-# GitHub Actions POC for Jenkins Single-shot master
+# GitHub Actions POC for Jenkins Single-shot main
 
 ![Docker](https://github.com/jenkinsci/jenkinsfile-runner-github-actions/workflows/Docker/badge.svg)
 [![GitHubActions](https://img.shields.io/badge/listed%20on-GitHubActions-blue.svg)](https://github-actions.netlify.com/jenkins-single-shot)
@@ -39,9 +39,9 @@ jobs:
   jenkinsfile-runner-prepackaged:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@main
     - name: jenkinsfile-runner-prepackaged
-      uses: jenkinsci/jenkinsfile-runner-github-actions/jenkinsfile-runner-prepackaged@master
+      uses: jenkinsci/jenkinsfile-runner-github-actions/jenkinsfile-runner-prepackaged@main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -54,11 +54,11 @@ import groovy.json.JsonOutput
 
 node {
     // pull request or feature branch
-    if  (env.GITHUB_REF != 'refs/heads/master') {
+    if  (env.GITHUB_REF != 'refs/heads/main') {
         checkoutSource()
         build()
         unitTest()
-    } // master branch / production
+    } // main branch / production
     else {
         checkoutSource()
         build()
