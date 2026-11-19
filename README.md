@@ -165,12 +165,12 @@ In case you like to modify the [Docker base image](https://hub.docker.com/r/joni
 
 ## Current Limitations / TODOs
 
-This is just a POC, in order to productize this, you would probably
-* [Automate](https://jenkins.io/blog/2018/10/16/custom-war-packager/#jenkinsfile-runner-packaging) the creation of the pre-packaged Jenkins Docker container
-* populate Jenkins environmental variables based on the [GitHub Actions context](https://developer.github.com/actions/creating-github-actions/accessing-the-runtime-environment/#environment-variables)
-* Find a better way to populate the job workspace with the content of ```/github/workspace``` other than manually copying the files over as part of your ```Jenkinsfile```
-* Find a better way to package maven binaries and additional plugins
-* Find a better way to share maven plugins other than manually mapping the local maven repo to ```/github/workspace/.m2``` in your ```Jenkinsfile```
-* Find a better way to cache the lazy-loaded Jenkins as ```/github/workspace/.jenkinsfile-runner-cache``` as specified [here](https://github.com/jonico/jenkinsfile-runner-github-actions/blob/master/jenkinsfile-runner-lazyloaded/Dockerfile#L19)
-* Add examples of how to work with [Jenkins secrets](https://github.com/ndeloof/jenkinsfile-runner#sensitive-data)
-* Provide examples how to copy parts of the Jenkins results to an external storage
+Remaining work is tracked as individual issues so contributors can pick it up:
+
+* [Use the GitHub Actions workspace without manual copying](https://github.com/jenkinsci/jenkinsfile-runner-github-actions/issues/23)
+* [Share Maven plugins without mapping the local `.m2` repo](https://github.com/jenkinsci/jenkinsfile-runner-github-actions/issues/24)
+* [Cache the lazy-loaded Jenkins cache directory](https://github.com/jenkinsci/jenkinsfile-runner-github-actions/issues/25)
+* [Example: GitHub Actions secrets as Jenkins credentials](https://github.com/jenkinsci/jenkinsfile-runner-github-actions/issues/26)
+* [Example: export Jenkins results to external storage](https://github.com/jenkinsci/jenkinsfile-runner-github-actions/issues/27)
+
+Previously listed items that are now covered by standard tooling have been removed: pre-packaged image creation is described in the [Jenkinsfile Runner image extension guide](https://github.com/jenkinsci/jenkinsfile-runner/blob/main/docs/using/EXTENDING_DOCKER.adoc), plugins are installed with the [Plugin Installation Manager Tool](https://github.com/jenkinsci/plugin-installation-manager-tool), and GitHub Actions environment variables are available to the container without extra mapping.
